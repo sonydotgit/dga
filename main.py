@@ -5,7 +5,6 @@ import os
 import sys
 from multiprocessing import Process, Queue
 from modules.get_training_data import get_data
-from modules.get_training_data import format_data
 from modules.train_model import train
 from modules.capture_domain import capture
 
@@ -15,8 +14,6 @@ def create_bt(button_name):
             text=button_name,
             width=12,
             height=2,
-            padx=10,
-            pady=10,
             )
     return button
 
@@ -30,12 +27,25 @@ def display_buttons():
     global get_datasets_bt
     global train_model_bt
     global capture_domains_bt
+    global provide_domain_bt
+    global exit_bt
 
+    exit_bt = create_bt("Exit")
+    exit_bt.config(command=root.destroy)
+    provide_domain_bt = create_bt("Provide Domain")
+    provide_domain_bt.config(command=lambda: input_domain())
     get_datasets_bt = create_bt("Get Datasets")
     get_datasets_bt.config(command=lambda: view_progress("Getting Datasets", get_data))
     train_model_bt = create_bt("Train Model")
     train_model_bt.config(command=lambda: view_progress("Training Model", train))
     capture_domains_bt = create_bt("Capture Domains")
+    capture_domains_bt.config(command=lambda: real_time())
+
+def input_domain():
+    pass
+
+def real_time():
+    pass
 
 def view_progress(window_title, function_name):
     # create a new window
@@ -75,37 +85,32 @@ def main():
     global status
 
     root = tk.Tk()
-    root.geometry("500x250")
+    root.geometry("520x260")
     root.title("DGA Detection")
 
     # Configure grid
-    root.columnconfigure(0, weight=0)
+    root.columnconfigure(0, weight=1)
     root.columnconfigure(1, weight=4)
-    root.columnconfigure(2, weight=0)
+    root.columnconfigure(2, weight=1)
 
     # Create buttons for the
     # main screen
     display_buttons()
 
-    global exit_bt
-
-    exit_bt = tk.Button(
-            text="Exit",
-            width=12,
-            height=2,
-            padx=10,
-            pady=10,
-            command=root.destroy
-            )
-
     # Position buttons
-    get_datasets_bt.grid(row=0, column=1)
-    train_model_bt.grid(row=1, column=1)
-    capture_domains_bt.grid(row=2, column=1)
-    exit_bt.grid(row=3, column=1)
+    get_datasets_bt.grid(row=0, column=1, pady=(10,10))
+    train_model_bt.grid(row=1, column=1, pady=(10,10))
+    capture_domains_bt.grid(row=2, column=0, pady=(10,10))
+    provide_domain_bt.grid(row=2, column=2, pady=(10, 10))
+    exit_bt.grid(row=2, column=1, pady=(10, 10))
+
+
+    # add main label at bottom
+    main_string = "Despite the awful look, it works."
+    main_label = tk.Label(root, text=main_string, pady=20)
+    main_label.grid(row=3, column=1)
 
     root.mainloop()
-
 
 if __name__ == '__main__':
     main()

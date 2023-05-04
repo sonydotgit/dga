@@ -5,7 +5,6 @@ import logging
 import pickle
 import tldextract
 import iptc
-# from sklearn.externals import joblib
 import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 from scapy.all import *
@@ -21,9 +20,11 @@ def packet_callback(packet):
         if packet.haslayer(DNS) and packet.getlayer(DNS).qr == 0:
             qname = packet.getlayer(DNS).qd.qname.decode("utf-8")
             ext_qname = tldextract.extract(qname)
+            print(ext_qname.domain)
             if len(ext_qname.domain) > 6 and "-" not in ext_qname.domain and ext_qname.domain != pre_domain:
                 match = ngram_counts * vectorizer.transform([ext_qname.domain]).transpose()
                 X_pred = [len(ext_qname.domain), match]
+                print(X_pred)
                 pre_domain = ext_qname.domain
                 if clf.predict([X_pred]) == 'dga':
                     print(str(ip_src.encode("utf-8")) + ' --> ' + str(ip_dst.encode("utf-8")) + ' : ' + qname)
@@ -102,7 +103,7 @@ def capture():
     start_time = datetime.now()
 
     # Main process, scanning network
-    sniff(iface=interface, filter="port 53", store=0, prn=packet_callback)
+    sniff(iface=interface, filter="port 53",count=1, store=0, prn=packet_callback)
 
     stop_time = datetime.now()
     total_time = stop_time - start_time
