@@ -1,0 +1,7 @@
+python-iptables
+pandas
+scikit-learn
+numpy
+tldextract
+scapy
+scipy
