@@ -165,11 +165,6 @@ def main():
     exit_bt.grid(row=2, column=1, pady=(10, 10))
 
 
-    # add main label at bottom
-    main_string = "Despite the awful look, it works."
-    main_label = tk.Label(root, text=main_string, pady=20)
-    main_label.grid(row=3, column=1)
-
     root.mainloop()
 
 if __name__ == '__main__':
