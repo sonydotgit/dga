@@ -3,6 +3,7 @@ Starting capture network traffic and blocking hosts
 """
 import logging
 import pickle
+import time
 import tldextract
 import iptc
 import joblib
@@ -52,7 +53,7 @@ def iptables(dga_hosts):
             chain.insert_rule(rule)
 
 
-def capture():
+def capture(progress_queue):
     global ngram_counts
     global vectorizer
     global clf
@@ -60,14 +61,16 @@ def capture():
     global logger
     global dga_hosts
 
-    print("[*] Loading training dataset from disk...")
+    progress_queue.put((10, "Loading dataset from disk..."))
+    time.sleep(1)
     with open('input data/training_data.pkl', 'rb') as f:
         training_data = pickle.load(f)
 
-    print("[*] Loading model from disk...")
+    progress_queue.put((20, "Loading model from disk..."))
+    time.sleep(1)
     clf = joblib.load('input data/model.pkl')
 
-    print("[*] Loading and preparing necessary data for model...")
+    progress_queue.put((30, "Loading and preparing necessary data for model"))
     # Repeat operations on count ngram counts
     vectorizer = CountVectorizer(ngram_range=(3, 5), analyzer='char', max_df=1.0, min_df=0.0001)
     ngram_matrix = vectorizer.fit_transform(training_data['legit']['domain'])
@@ -81,9 +84,10 @@ def capture():
     dga_hosts = {}
 
     print("List system interfaces: ", os.listdir('/sys/class/net/'))
-    interface = input("Enter desired interface: ")
+    # interface = input("Enter desired interface: ")
+    interface = 'enp0s1'
 
-    print("[*] Scanning...")
+    progress_queue.put((70, "Scanning..."))
 
     # Setup logger
     directory = os.path.dirname('logs/')
