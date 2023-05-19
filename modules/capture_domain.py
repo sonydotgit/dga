@@ -11,10 +11,15 @@ from sklearn.feature_extraction.text import CountVectorizer
 from scapy.all import *
 from scapy.layers.dns import DNS
 from scapy.layers.inet import IP
+import numpy as np
 
 
 def packet_callback(packet):
     global pre_domain
+    global pred_result
+
+    pred_result = 0
+
     if IP in packet:
         ip_src = packet[IP].src
         ip_dst = packet[IP].dst
@@ -25,9 +30,11 @@ def packet_callback(packet):
             if len(ext_qname.domain) > 6 and "-" not in ext_qname.domain and ext_qname.domain != pre_domain:
                 match = ngram_counts * vectorizer.transform([ext_qname.domain]).transpose()
                 X_pred = [len(ext_qname.domain), match]
+                X_pred = np.array(X_pred, dtype=object)
                 print(X_pred)
                 pre_domain = ext_qname.domain
                 if clf.predict([X_pred]) == 'dga':
+                    pred_result = 1
                     print(str(ip_src.encode("utf-8")) + ' --> ' + str(ip_dst.encode("utf-8")) + ' : ' + qname)
                     logger.info(str(ip_src.encode("utf-8")) + ' --> ' + str(ip_dst.encode("utf-8")) + ' : ' + qname)
                     # Check if ip source already exists
@@ -85,7 +92,7 @@ def capture(progress_queue):
 
     print("List system interfaces: ", os.listdir('/sys/class/net/'))
     # interface = input("Enter desired interface: ")
-    interface = 'enp0s1'
+    interface = 'wlan0'
 
     progress_queue.put((70, "Scanning..."))
 
@@ -115,11 +122,20 @@ def capture(progress_queue):
     print("Scan duration: %s" % (total_time))
     logger.info("Scan duration: %s" % (total_time))
 
-    answer = input("You want block possibly dangerous hosts? Enter yes or no: ")
-    if answer == "yes":
+    if pred_result == 1:
+        progress_queue.put((99, "Detected dga domain, blocking."))
         iptables(dga_hosts)
-    elif answer == "No":
-        print("Skipping blocking...")
+    else:
+        progress_queue.put((99, "None detected"))
+
+    time.sleep(2)
+    iptables(dga_hosts)
+
+#     answer = input("You want block possibly dangerous hosts? Enter yes or no: ")
+#     if answer == "yes":
+#         iptables(dga_hosts)
+#     elif answer == "No":
+#         print("Skipping blocking...")
 
 
 if __name__ == "__main__":

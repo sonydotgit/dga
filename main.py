@@ -41,7 +41,7 @@ def display_buttons():
     train_model_bt = create_bt("Train Model")
     train_model_bt.config(command=lambda: view_progress("Training Model", train))
     capture_domains_bt = create_bt("Capture Domains")
-    capture_domains_bt.config(command=lambda: view_progress("Capturing real time traffic", capture))
+    capture_domains_bt.config(command=lambda: view_progress("Monitor real time traffic", capture))
 
 def onsubmit(stuff):
     progress_bar, progress_var, status_label = stuff
@@ -60,7 +60,7 @@ def onsubmit(stuff):
             status_label.config(text=progress_string)
             get_domain_win.update_idletasks()
 
-    time.sleep(4)
+    time.sleep(8)
     get_domain_win.destroy()
 
 def input_domain():
@@ -95,7 +95,7 @@ def input_domain():
     progress_bar.grid(column=0, row=2, columnspan=2,
                     padx=5, pady=5)
     status_label = ttk.Label(get_domain_win,
-                            text="Initialising...")
+                            text="Enter Domain without TDL")
     status_label.grid(column=1, row=3,
                         padx=5, pady=5,
                         sticky=tk.W)
@@ -137,7 +137,7 @@ def view_progress(window_title, function_name):
             progress_window.update_idletasks()
 
     status_label.config(text="Done")
-    time.sleep(1)
+    time.sleep(6)
     progress_window.destroy()
 
 def main():
